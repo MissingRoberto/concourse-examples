@@ -1,0 +1,49 @@
+---
+# CHANGED
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+    tag: latest
+# End CHANGED
+resources:
+# CHANGED
+- name: slack-alert
+  type: slack-notification
+  source:
+    url: {{slack-webhook}}
+# End CHANGED
+- name: resource-web-app
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry-community/simple-go-web-app.git
+
+- name: resource-deploy-web-app
+  type: cf
+  source:
+    api: {{cf-api}}
+    username: {{cf-username}}
+    password: {{cf-password}}
+    organization: {{cf-organization}}
+    space: {{cf-space}}
+    skip_cert_check: true
+
+jobs:
+- name: job-deploy-app
+  serial: true
+  plan:
+  - {get: resource-web-app, trigger: true}
+  - put: resource-deploy-web-app
+    params:
+      manifest: resource-web-app/manifest.yml
+      path: resource-web-app
+  # CHANGED
+  - put: slack-alert
+    params:
+      channel: '#concoursemessagetest'
+      username: 'concourse'
+      text: |
+        <!here|here>
+        *Simple Go Web App* deployed on *Cloud Foundry*
+  # End CHANGED

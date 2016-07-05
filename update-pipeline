@@ -1,0 +1,3 @@
+#!/bin/bash
+
+fly -t $1 set-pipeline -p $2 -c $2/pipeline.yml -l credentials.yml -l config.yml -n

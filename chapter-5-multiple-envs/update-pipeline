@@ -1,0 +1,6 @@
+#!/bin/bash
+
+ls environments/*.yml | while read line ; do
+  echo "Updating pipeline: $(basename $line)"
+  echo -e "yes\n" | fly -t $1 set-pipeline -p $2-$(basename $line)  -c ../$2/pipeline.yml -l ../config.yml -l $line
+done
